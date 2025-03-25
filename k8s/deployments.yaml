@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: expense-tracker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: expense-tracker
+  template:
+    metadata:
+      labels:
+        app: expense-tracker
+    spec:
+      containers:
+      - name: expense-tracker
+        image: expense-tracker:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8001
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        volumeMounts:
+        - name: expense-data
+          mountPath: /app/data
+      volumes:
+      - name: expense-data
+        persistentVolumeClaim:
+          claimName: expense-db-pvc
+---
+# Similar deployments for news-aggregator and prediction-engine
